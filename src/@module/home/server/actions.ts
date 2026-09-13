@@ -23,20 +23,14 @@ function toOnboardingConflictError(insertError: {
     const text = `${insertError.message ?? ""} ${insertError.details ?? ""}`.toLowerCase();
 
     if (text.includes("email")) {
-        return new OnboardingConflictError("email", "This email is already registered.");
+        return new OnboardingConflictError("This email is already registered.", "email");
     }
     if (text.includes("contact_number") || text.includes("phone")) {
-        return new OnboardingConflictError(
-            "contactNumber",
-            "This phone number is already registered.",
-        );
+        return new OnboardingConflictError("This phone number is already registered.", "contactNumber");
     }
 
     // Unknown unique constraint - still avoid leaking the raw DB error.
-    return new OnboardingConflictError(
-        "email",
-        "This email or phone number is already registered.",
-    );
+    return new OnboardingConflictError("This email or phone number is already registered.");
 }
 
 export async function joinCommunityAction(data: OnboardingFormData) {
@@ -74,7 +68,7 @@ export async function joinCommunityAction(data: OnboardingFormData) {
     }
 
     if (existingEmail) {
-        throw new OnboardingConflictError("email", "This email is already registered.");
+        throw new OnboardingConflictError("This email is already registered.", "email");
     }
 
     // 4. Guard rail: Check if contact number already exists
@@ -90,10 +84,7 @@ export async function joinCommunityAction(data: OnboardingFormData) {
     }
 
     if (existingPhone) {
-        throw new OnboardingConflictError(
-            "contactNumber",
-            "This phone number is already registered.",
-        );
+        throw new OnboardingConflictError("This phone number is already registered.", "contactNumber");
     }
 
     // 5. Insert new record (E.164 with leading "+")

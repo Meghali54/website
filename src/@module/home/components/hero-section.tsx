@@ -15,6 +15,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { OnboardingForm } from "@/@module/home/components/onboarding-form";
 import { CommunityCounter } from "@/@module/home/components/community-counter";
 import { onboardingService } from "@/@module/home/services/onboarding";
+import type { OnboardingFormData } from "@/@module/home/schemas/onboarding.schema";
 import { toast } from "@/components/ui/toast";
 
 export function HeroSection() {
@@ -28,7 +29,7 @@ export function HeroSection() {
     return () => window.removeEventListener("open-onboarding", handleOpen);
   }, []);
 
-  const handleJoinCommunity = async (data: any) => {
+  const handleJoinCommunity = async (data: OnboardingFormData) => {
     setIsSubmitting(true);
     try {
       await onboardingService.submit(data);
@@ -42,16 +43,22 @@ export function HeroSection() {
         clearTimeout(timer)
       }, 1000)
       setIsOpen(false);
-    } catch (error: any) {
-      toast.add({
-        title: "Registration Failed",
-        description: error.message || "Please check your inputs and try again.",
-        type: "error",
-      });
-      setIsOpen(false);
+    } catch (error) {
+      // Re-thrown so OnboardingForm can show a field-specific inline error
+      // (e.g. duplicate email/phone) instead of a toast, and keep the modal
+      // open so the user doesn't lose what they've typed.
+      throw error;
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleJoinCommunityError = (message: string) => {
+    toast.add({
+      title: "Registration Failed",
+      description: message,
+      type: "error",
+    });
   };
 
   return (
@@ -90,7 +97,7 @@ export function HeroSection() {
 
         {/* Centered Large Headline */}
         <h1 className="font-heading text-4xl sm:text-5xl lg:text-[64px] font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/95 to-primary dark:to-[#3de0db] leading-[1.12] max-w-4xl mt-8">
-          Bridging Bengal's Engineering Talent & Wisdom
+          Bridging Bengal&apos;s Engineering Talent & Wisdom
         </h1>
 
         {/* Subtitle Paragraph */}
@@ -204,6 +211,7 @@ export function HeroSection() {
             description="Create your profile to connect with regional engineers, startups, and career roles."
             buttonText="Submit Profile"
             onSubmit={handleJoinCommunity}
+            onError={handleJoinCommunityError}
             isSubmitting={isSubmitting}
           />
         </DialogContent>

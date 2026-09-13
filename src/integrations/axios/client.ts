@@ -19,12 +19,21 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // Response interceptor to format response uniformly
+export class ApiError extends Error {
+  field?: string;
+
+  constructor(message: string, field?: string) {
+    super(message);
+    this.name = "ApiError";
+    this.field = field;
+  }
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message =
-      error.response?.data?.error ||
-      "An unexpected error occurred. Please try again.";
-    return Promise.reject(new Error(message));
+    const data = error.response?.data;
+    const message = data?.error || "An unexpected error occurred. Please try again.";
+    return Promise.reject(new ApiError(message, data?.field));
   },
 );

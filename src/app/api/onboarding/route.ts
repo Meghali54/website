@@ -7,12 +7,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     const result = await joinCommunityAction(body);
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
     const isConflict = error instanceof OnboardingConflictError;
+    const message = error instanceof Error ? error.message : "An unexpected error occurred.";
 
     return NextResponse.json(
       {
-        error: error.message || "An unexpected error occurred.",
+        error: message,
         // Lets the client attach the error to the right form field
         // (e.g. "email" or "contactNumber") instead of a generic toast.
         ...(isConflict ? { field: error.field } : {}),

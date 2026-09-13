@@ -8,9 +8,9 @@
  * marked "use server" may only export async functions.
  */
 export class OnboardingConflictError extends Error {
-    field: "email" | "contactNumber";
+    field?: "email" | "contactNumber";
 
-    constructor(field: "email" | "contactNumber", message: string) {
+    constructor(message: string, field?: "email" | "contactNumber") {
         super(message);
         this.name = "OnboardingConflictError";
         this.field = field;
