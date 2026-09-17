@@ -14,8 +14,6 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error: message,
-        // Lets the client attach the error to the right form field
-        // (e.g. "email" or "contactNumber") instead of a generic toast.
         ...(isConflict ? { field: error.field } : {}),
       },
       { status: isConflict ? 409 : 400 },

@@ -24,7 +24,6 @@ interface OnboardingFormProps
     description: string;
     buttonText: string;
     onSubmit: (data: OnboardingFormData) => Promise<void>;
-    /** Called for errors that aren't tied to a specific field (e.g. network issues). */
     onError?: (message: string) => void;
     isSubmitting?: boolean;
 }
@@ -81,9 +80,6 @@ export const OnboardingForm = forwardRef<HTMLDivElement, OnboardingFormProps>(
                 const message: string =
                     error instanceof Error ? error.message : "Something went wrong. Please try again.";
 
-                // Duplicate email/phone (or any other field-specific issue) is
-                // shown inline next to the relevant field instead of a toast,
-                // and never exposes the raw backend/database error.
                 if (field === "email" || field === "contactNumber") {
                     setError(field, { type: "server", message });
                 } else {

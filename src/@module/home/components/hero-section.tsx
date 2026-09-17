@@ -44,9 +44,6 @@ export function HeroSection() {
       }, 1000)
       setIsOpen(false);
     } catch (error) {
-      // Re-thrown so OnboardingForm can show a field-specific inline error
-      // (e.g. duplicate email/phone) instead of a toast, and keep the modal
-      // open so the user doesn't lose what they've typed.
       throw error;
     } finally {
       setIsSubmitting(false);
