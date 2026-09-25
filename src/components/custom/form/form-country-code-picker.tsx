@@ -44,8 +44,10 @@ export default function CountryCodePicker({
                     <Phone className="h-4 w-4" />
                 </div>
                 <PopoverTrigger
+                    type="button"
                     aria-label="Country code"
                     aria-invalid={invalid}
+                    onMouseDown={(event) => event.preventDefault()}
                     className="flex h-10 items-center gap-1.5 rounded-none border border-input bg-muted/20 hover:bg-muted/40 transition-all pl-10 pr-2 text-sm outline-none max-w-[136px] aria-invalid:border-destructive"
                 >
                     <span className="font-semibold">{selected.iso}</span>

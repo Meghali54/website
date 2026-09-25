@@ -18,11 +18,13 @@ import IconFormInputField from "@/components/custom/form/form-input-field";
 import FormToggleInputField from "@/components/custom/form/form-toggle-input-field";
 import PhoneNumberField from "@/components/custom/form/form-phone-number-field";
 
-interface OnboardingFormProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit"> {
+interface OnboardingFormProps
+    extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSubmit" | "onError"> {
     title: string;
     description: string;
     buttonText: string;
-    onSubmit: (data: OnboardingFormData) => void;
+    onSubmit: (data: OnboardingFormData) => Promise<void>;
+    onError?: (message: string) => void;
     isSubmitting?: boolean;
 }
 const professionOptions = [
@@ -42,7 +44,7 @@ const onboardingFormCoverImage =
 
 export const OnboardingForm = forwardRef<HTMLDivElement, OnboardingFormProps>(
     (
-        { className, title, description, buttonText, onSubmit, isSubmitting = false, ...props },
+        { className, title, description, buttonText, onSubmit, onError, isSubmitting = false, ...props },
         ref,
     ) => {
         const {
@@ -50,6 +52,7 @@ export const OnboardingForm = forwardRef<HTMLDivElement, OnboardingFormProps>(
             handleSubmit,
             control,
             setValue,
+            setError,
             watch,
             formState: { errors, isSubmitting: isSubmittingState },
         } = useForm<OnboardingFormInput, unknown, OnboardingFormData>({
@@ -66,8 +69,23 @@ export const OnboardingForm = forwardRef<HTMLDivElement, OnboardingFormProps>(
 
         const countryIso = watch("countryCode");
 
-        const handleFormSubmit = handleSubmit((data) => {
-            onSubmit(data);
+        const handleFormSubmit = handleSubmit(async (data) => {
+            try {
+                await onSubmit(data);
+            } catch (error: unknown) {
+                const field =
+                    typeof error === "object" && error !== null && "field" in error
+                        ? error.field
+                        : undefined;
+                const message: string =
+                    error instanceof Error ? error.message : "Something went wrong. Please try again.";
+
+                if (field === "email" || field === "contactNumber") {
+                    setError(field, { type: "server", message });
+                } else {
+                    onError?.(message);
+                }
+            }
         });
 
         return (
