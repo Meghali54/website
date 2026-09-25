@@ -4,9 +4,29 @@ import { createClient } from "@/integrations/supabase/server";
 import { sendWelcomeEmail } from "@/lib/email";
 import { COUNTRY_BY_ISO } from "@/lib/country-codes";
 import { onboardingFormSchema, type OnboardingFormData } from "../schemas/onboarding.schema";
+import { OnboardingConflictError } from "./onboarding-errors";
+
+function toOnboardingConflictError(insertError: {
+    code?: string;
+    message?: string;
+    details?: string | null;
+    constraint?: string;
+}): OnboardingConflictError | null {
+    if (insertError.code !== "23505") return null;
+
+    const text = `${insertError.constraint ?? ""} ${insertError.message ?? ""} ${insertError.details ?? ""}`.toLowerCase();
+
+    if (text.includes("email")) {
+        return new OnboardingConflictError("This email is already registered.", "email");
+    }
+    if (text.includes("contact_number") || text.includes("phone")) {
+        return new OnboardingConflictError("This phone number is already registered.", "contactNumber");
+    }
+
+    return new OnboardingConflictError("This email or phone number is already registered.");
+}
 
 export async function joinCommunityAction(data: OnboardingFormData) {
-    // 1. Validate payload using the zod schema
     const validation = onboardingFormSchema.safeParse(data);
     if (!validation.success) {
         throw new Error("Validation failed. Please check your form inputs.");
@@ -24,10 +44,8 @@ export async function joinCommunityAction(data: OnboardingFormData) {
     }
     const validCountryCode = known.iso;
 
-    // 2. Initialize Supabase client
     const supabase = await createClient();
 
-    // 3. Guard rail: Check if email already exists
     const { data: existingEmail, error: emailCheckError } = await supabase
         .from("profiles")
         .select("email")
@@ -40,10 +58,9 @@ export async function joinCommunityAction(data: OnboardingFormData) {
     }
 
     if (existingEmail) {
-        throw new Error("Email address is already registered in the community.");
+        throw new OnboardingConflictError("This email is already registered.", "email");
     }
 
-    // 4. Guard rail: Check if contact number already exists
     const { data: existingPhone, error: phoneCheckError } = await supabase
         .from("profiles")
         .select("contact_number")
@@ -56,10 +73,9 @@ export async function joinCommunityAction(data: OnboardingFormData) {
     }
 
     if (existingPhone) {
-        throw new Error("Contact number is already registered in the community.");
+        throw new OnboardingConflictError("This phone number is already registered.", "contactNumber");
     }
 
-    // 5. Insert new record (E.164 with leading "+")
     const insertPayload = {
         name,
         email,
@@ -72,15 +88,19 @@ export async function joinCommunityAction(data: OnboardingFormData) {
 
     if (insertError) {
         console.error("Supabase insert error:", insertError);
+
+        const conflictError = toOnboardingConflictError(insertError);
+        if (conflictError) {
+            throw conflictError;
+        }
+
         throw new Error("Failed to submit onboarding profile. Please try again.");
     }
 
-    // 6. Send welcome email via Resend
     try {
         await sendWelcomeEmail({ email, name });
     } catch (emailErr) {
         console.error("Failed to send welcome email during onboarding:", emailErr);
-        // Note: Database insert succeeded, so we don't throw to avoid breaking user experience
     }
 
     return {
