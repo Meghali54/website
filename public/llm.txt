@@ -5,17 +5,6 @@
 ## Core pages
 
 - [Home](https://westbengal.tech/): Overview of the West Bengal developer network, local technology ecosystem, community initiatives, and current opportunities.
-- [Project Showcase](https://westbengal.tech/project-showcase): Public collection of web applications, Indic AI projects, and open-source developer tools built by engineers across West Bengal.
-
-## Articles
-
-- [West Bengal Tech Initiative](https://westbengal.tech/article/news-1): Introduction to the westbengal.tech initiative and its mission to connect developers, startups, open-source projects, and technology careers in the region.
-- [React Kolkata Meetup 18](https://westbengal.tech/article/meetup-1): Announcement for a React Kolkata meetup covering modern high-performance web applications, technical talks, demos, and networking.
-- [BengalAI Regional Language LLMs](https://westbengal.tech/article/startup-1): Startup spotlight on BengalAI, regional-language language models, and its Indic NLP developer toolkit.
-- [DevStudio React Dashboard Builder](https://westbengal.tech/article/opensource-1): Open-source project spotlight for a draggable React and Next.js dashboard builder.
-- [BengalScale Frontend Engineer Role](https://westbengal.tech/article/job-1): Engineering career article about a senior frontend engineer opportunity using React and TypeScript.
-- [KolkataJS Conf 2026 CFP](https://westbengal.tech/article/meetup-2): Call for speaker proposals for KolkataJS Conf 2026.
-- [Sector V Technology Infrastructure](https://westbengal.tech/article/news-2): News about fiber-optic upgrades and co-working hubs in Kolkata's Sector V technology district.
 
 ## Public discovery resources
 
